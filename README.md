@@ -17,6 +17,26 @@ The project demonstrates how an AMR can safely respond when sensors or system co
 * 🌐 FastAPI + WebSocket dashboard
 * 🔄 Automatic dashboard reconnect
 
+## Screenshots
+
+### Gazebo Warehouse Simulation
+
+![Gazebo warehouse simulation](docs/screenshots/gazebo-warehouse.png)
+
+The robot running inside the simulated warehouse environment.
+
+### Live Robot Dashboard
+
+![Live robot dashboard](docs/screenshots/dashboard-overview.png)
+
+The web dashboard showing robot health, battery status, safety state, and LiDAR visualization.
+
+### Sensor Fault Handling
+
+![Sensor fault handling](docs/screenshots/sensor-failure.png)
+
+Example of the system detecting a sensor failure and moving the robot into a safe state.
+
 ## Safety Flow
 
 ```text
