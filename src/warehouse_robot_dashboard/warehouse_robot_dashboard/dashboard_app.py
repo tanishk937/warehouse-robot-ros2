@@ -37,6 +37,10 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
+STATIC_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    'static',
+)
 
 def build_app(static_dir: str, get_snapshot, enqueue,
               broadcast_rate_hz: float = 5.0) -> FastAPI:

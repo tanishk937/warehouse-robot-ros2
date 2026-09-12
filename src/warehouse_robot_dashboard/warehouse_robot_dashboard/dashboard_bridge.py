@@ -221,12 +221,17 @@ class DashboardBridge(Node):
             self._record_result(False, f'[{label}] service call failed: {exc}')
 
     def _record_result(self, success, message):
-        with self._lock:
-            self._state['last_command_result'] = {
-                'success': success, 'message': message, 'timestamp': time.time(), }
-        level = self.get_logger().info if success else self.get_logger().warn
-        level(f'[DASHBOARD] {message}')
 
+        with self._lock:
+
+            self._state['last_command_result'] = {
+
+                'success': success, 'message': message, 'timestamp': time.time(), }
+
+        if success:
+            self.get_logger().info(f'[DASHBOARD] {message}')
+        else:
+            self.get_logger().warning(f'[DASHBOARD] {message}')
     # ---- snapshot for the websocket loop --------------------------------
 
     def snapshot(self):
