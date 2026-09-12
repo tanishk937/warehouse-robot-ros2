@@ -1,0 +1,37 @@
+# Modular sensor registry for sensor_heartbeat_monitor.
+#
+# To add a new sensor to the fleet, add its name to "sensor_names" and
+# add a matching "<name>.*" parameter block below. No source code in
+# sensor_heartbeat_monitor.py needs to change.
+
+sensor_heartbeat_monitor:
+  ros__parameters:
+    check_rate_hz: 5.0
+    sensor_names: ["lidar", "odometry", "battery", "imu"]
+
+    lidar.topic: "/scan"
+    lidar.msg_type: "sensor_msgs/msg/LaserScan"
+    lidar.criticality: "critical"
+    lidar.expected_frequency_hz: 10.0
+    lidar.stale_timeout_sec: 1.0
+
+    odometry.topic: "/odom"
+    odometry.msg_type: "nav_msgs/msg/Odometry"
+    odometry.criticality: "critical"
+    odometry.expected_frequency_hz: 20.0
+    odometry.stale_timeout_sec: 0.5
+
+    battery.topic: "/battery_state"
+    battery.msg_type: "sensor_msgs/msg/BatteryState"
+    battery.criticality: "critical"
+    battery.expected_frequency_hz: 1.0
+    battery.stale_timeout_sec: 3.0
+
+    # Example of a non-critical sensor: if it goes stale, the robot
+    # keeps operating (dynamic failover) but the dashboard shows a
+    # WARN, never an ERROR / overall-system fault.
+    imu.topic: "/imu"
+    imu.msg_type: "sensor_msgs/msg/Imu"
+    imu.criticality: "non_critical"
+    imu.expected_frequency_hz: 50.0
+    imu.stale_timeout_sec: 1.0

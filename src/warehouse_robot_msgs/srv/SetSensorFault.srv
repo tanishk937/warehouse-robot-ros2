@@ -1,0 +1,17 @@
+# Fault-injection control for sensor_fault_injector.
+#
+# fault_enabled=true  -> the named sensor's public topic (e.g. /scan)
+#                        stops being republished from its Gazebo source
+#                        (e.g. /scan_raw). Every downstream consumer
+#                        (sensor_heartbeat_monitor, safety_controller,
+#                        localization_monitor) sees this exactly like a
+#                        real sensor dying: the topic simply goes silent
+#                        and their existing staleness-detection logic
+#                        takes over. No process needs to be killed.
+# fault_enabled=false -> normal passthrough resumes immediately.
+
+string sensor_name
+bool fault_enabled
+---
+bool success
+string message

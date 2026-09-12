@@ -1,0 +1,28 @@
+# ROS 2 / colcon
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Development backups
+*.bak
+*.backup
+
+# Local recordings / generated media
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# IDE / editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

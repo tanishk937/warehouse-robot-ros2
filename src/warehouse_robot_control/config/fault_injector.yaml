@@ -1,0 +1,29 @@
+# Topic-gate fault injection registry for sensor_fault_injector.
+#
+# Each entry bridges a raw Gazebo topic to the public topic name the
+# rest of the system actually watches. Setting fault_enabled=true via
+# the /fault/set_sensor_fault service stops the passthrough, which the
+# rest of the system experiences exactly like a real sensor failure.
+#
+# To make a new sensor fault-injectable, add it here AND make sure its
+# Gazebo plugin publishes to "<name>_raw" instead of the public name.
+# No source code changes required.
+
+sensor_fault_injector:
+  ros__parameters:
+    sensor_names: ["lidar", "imu", "odometry"]
+
+    lidar.raw_topic: "/scan_raw"
+    lidar.public_topic: "/scan"
+    lidar.msg_type: "sensor_msgs/msg/LaserScan"
+    lidar.qos: "best_effort"
+
+    imu.raw_topic: "/imu_raw"
+    imu.public_topic: "/imu"
+    imu.msg_type: "sensor_msgs/msg/Imu"
+    imu.qos: "best_effort"
+
+    odometry.raw_topic: "/odom_raw"
+    odometry.public_topic: "/odom"
+    odometry.msg_type: "nav_msgs/msg/Odometry"
+    odometry.qos: "reliable"

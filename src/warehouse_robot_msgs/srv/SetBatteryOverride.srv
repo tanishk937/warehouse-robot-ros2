@@ -1,0 +1,10 @@
+# Fault-injection control for battery_manager. When override_enabled is
+# true, battery_manager freezes simulated drain and reports exactly
+# 'percentage' until the override is cleared (override_enabled=false),
+# which resumes normal simulated drain from that percentage.
+
+float32 percentage
+bool override_enabled
+---
+bool success
+string message

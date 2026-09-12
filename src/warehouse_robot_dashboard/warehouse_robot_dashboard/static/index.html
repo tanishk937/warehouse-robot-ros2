@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Warehouse Robot Operations Console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #0b0e14;
+    --panel: #12161f;
+    --panel-border: #212734;
+    --text: #d7dce3;
+    --text-dim: #7d8697;
+    --accent: #3b82f6;
+    --ok: #22c55e;
+    --warn: #eab308;
+    --crit: #ef4444;
+    --estop: #6b7280;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 22px;
+    background: linear-gradient(180deg, #131722, #0f1219);
+    border-bottom: 1px solid var(--panel-border);
+  }
+  header h1 { font-size: 17px; margin: 0; letter-spacing: 0.5px; font-weight: 600; }
+  header .sub { color: var(--text-dim); font-size: 12px; margin-top: 2px; }
+  .conn-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px; font-size: 12px;
+    background: #182131; border: 1px solid var(--panel-border);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
+  .dot.on { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+  .dot.off { background: var(--crit); box-shadow: 0 0 6px var(--crit); }
+  .header-right { display: flex; gap: 14px; align-items: center; font-size: 12px; color: var(--text-dim); }
+
+  main {
+    display: grid;
+    grid-template-columns: 320px 1fr 340px;
+    gap: 14px;
+    padding: 16px;
+    align-items: start;
+  }
+  .col { display: flex; flex-direction: column; gap: 14px; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .card h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-dim); margin: 0 0 10px 0; font-weight: 600;
+  }
+
+  .status-indicator {
+    display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0 6px 0;
+  }
+  .status-circle {
+    width: 84px; height: 84px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 700;
+    border: 3px solid var(--panel-border);
+    transition: all 0.2s ease;
+  }
+  .status-label { font-size: 15px; font-weight: 700; letter-spacing: 1px; }
+  .status-sub { color: var(--text-dim); font-size: 12px; }
+
+  .kv { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
+  .kv .k { color: var(--text-dim); }
+  .kv .v { font-family: var(--mono); }
+
+  .battery-bar-track {
+    width: 100%; height: 16px; background: #1c2330; border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--panel-border); margin: 8px 0 10px 0;
+  }
+  .battery-bar-fill { height: 100%; transition: width 0.3s ease, background 0.3s ease; }
+
+  .sensor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .sensor-card {
+    border: 1px solid var(--panel-border); border-radius: 8px; padding: 8px 10px;
+    background: #0e1219;
+  }
+  .sensor-card .name { font-weight: 600; font-size: 12.5px; }
+  .sensor-card .badge {
+    display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 999px;
+    margin-top: 4px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .sensor-card .meta { color: var(--text-dim); font-size: 11px; margin-top: 4px; font-family: var(--mono); }
+
+  .badge.online { background: rgba(34,197,94,0.15); color: var(--ok); }
+  .badge.stale { background: rgba(234,179,8,0.15); color: var(--warn); }
+  .badge.failed { background: rgba(239,68,68,0.15); color: var(--crit); }
+
+  #estop-btn {
+    width: 100%; padding: 16px; font-size: 16px; font-weight: 800; letter-spacing: 1px;
+    border-radius: 8px; border: none; cursor: pointer; color: white;
+    background: linear-gradient(180deg, #ef4444, #dc2626);
+    box-shadow: 0 0 18px rgba(239,68,68,0.4);
+  }
+  #estop-btn.active { background: linear-gradient(180deg, #6b7280, #4b5563); box-shadow: none; }
+  #reset-btn {
+    width: 100%; margin-top: 8px; padding: 10px; font-size: 13px; font-weight: 700;
+    border-radius: 8px; border: 1px solid var(--panel-border); cursor: pointer;
+    background: #1c2330; color: var(--text); display: none;
+  }
+  #reset-btn.visible { display: block; }
+
+  #canvas-wrap { position: relative; }
+  canvas { width: 100%; height: 420px; background: #060a10; border-radius: 8px; border: 1px solid var(--panel-border); display: block; }
+
+  .event-log { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 6px; }
+  .event-row { font-size: 12px; padding: 6px 8px; border-radius: 6px; background: #0e1219; border-left: 3px solid var(--panel-border); }
+  .event-row .t { color: var(--text-dim); font-family: var(--mono); font-size: 10.5px; }
+  .event-row.crit { border-left-color: var(--crit); }
+  .event-row.warn { border-left-color: var(--warn); }
+
+  .vel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .vel-box { text-align: center; padding: 10px; background: #0e1219; border-radius: 8px; border: 1px solid var(--panel-border); }
+  .vel-box .val { font-family: var(--mono); font-size: 20px; font-weight: 700; }
+  .vel-box .lbl { color: var(--text-dim); font-size: 11px; margin-top: 4px; }
+
+  .fault-controls { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .fault-controls button {
+    font-size: 11px; padding: 5px 9px; border-radius: 6px; border: 1px solid var(--panel-border);
+    background: #1c2330; color: var(--text); cursor: pointer;
+  }
+  .fault-controls button:hover { background: #232c3d; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>WAREHOUSE ROBOT OPERATIONS CONSOLE</h1>
+    <div class="sub" id="robot-id-sub">Robot ID: -- &nbsp;|&nbsp; Autonomous Mobile Robot Fleet Monitor</div>
+  </div>
+  <div class="header-right">
+    <span class="conn-pill"><span class="dot" id="conn-dot"></span><span id="conn-text">Connecting…</span></span>
+    <span>Uptime: <b id="uptime">0s</b></span>
+    <span>Mode: <b id="op-mode">--</b></span>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT COLUMN -->
+  <div class="col">
+    <div class="card">
+      <h2>Robot Status</h2>
+      <div class="status-indicator">
+        <div class="status-circle" id="status-circle">●</div>
+        <div class="status-label" id="status-label">--</div>
+        <div class="status-sub" id="status-sub">waiting for data…</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Emergency Stop</h2>
+      <button id="estop-btn" onclick="triggerEstop()">EMERGENCY STOP</button>
+      <button id="reset-btn" onclick="resetEstop()">CONFIRM RESET (explicit action)</button>
+      <div class="kv" style="margin-top:10px;"><span class="k">E-Stop</span><span class="v" id="estop-state">CLEAR</span></div>
+      <div class="kv"><span class="k">Safety controller</span><span class="v" id="safety-state">--</span></div>
+      <div class="kv"><span class="k">LiDAR freshness</span><span class="v" id="lidar-fresh">--</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Battery</h2>
+      <div class="kv"><span class="k">Percentage</span><span class="v" id="batt-pct">--%</span></div>
+      <div class="battery-bar-track"><div class="battery-bar-fill" id="batt-bar" style="width:0%"></div></div>
+      <div class="kv"><span class="k">Voltage</span><span class="v" id="batt-volt">--</span></div>
+      <div class="kv"><span class="k">Current</span><span class="v" id="batt-current">--</span></div>
+      <div class="kv"><span class="k">State</span><span class="v" id="batt-state">--</span></div>
+      <div class="kv"><span class="k">Est. remaining</span><span class="v" id="batt-remaining">--</span></div>
+      <div class="kv"><span class="k">Source</span><span class="v" id="batt-source">--</span></div>
+      <div class="fault-controls">
+        <button onclick="setBatteryOverride(25, true)">Force LOW (25%)</button>
+        <button onclick="setBatteryOverride(10, true)">Force CRITICAL (10%)</button>
+        <button onclick="setBatteryOverride(0, false)">Clear override</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER COLUMN -->
+  <div class="col">
+    <div class="card" id="canvas-wrap">
+      <h2>Warehouse — Top-Down View</h2>
+      <canvas id="map" width="640" height="420"></canvas>
+    </div>
+
+    <div class="card">
+      <h2>Velocity</h2>
+      <div class="vel-grid">
+        <div class="vel-box"><div class="val" id="vel-lin-cmd">0.00</div><div class="lbl">Commanded Linear (m/s)</div></div>
+        <div class="vel-box"><div class="val" id="vel-ang-cmd">0.00</div><div class="lbl">Commanded Angular (rad/s)</div></div>
+        <div class="vel-box"><div class="val" id="vel-lin-act">0.00</div><div class="lbl">Actual Linear (m/s)</div></div>
+        <div class="vel-box"><div class="val" id="vel-ang-act">0.00</div><div class="lbl">Actual Angular (rad/s)</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Localization</h2>
+      <div class="kv"><span class="k">X</span><span class="v" id="loc-x">--</span></div>
+      <div class="kv"><span class="k">Y</span><span class="v" id="loc-y">--</span></div>
+      <div class="kv"><span class="k">Yaw</span><span class="v" id="loc-yaw">--</span></div>
+      <div class="kv"><span class="k">Source</span><span class="v" id="loc-source">--</span></div>
+      <div class="kv"><span class="k">State</span><span class="v" id="loc-state">--</span></div>
+      <div class="kv"><span class="k">Message</span><span class="v" id="loc-msg">--</span></div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col">
+    <div class="card">
+      <h2>Sensor Health</h2>
+      <div class="sensor-grid" id="sensor-grid"></div>
+      <div class="fault-controls" id="fault-controls"></div>
+    </div>
+
+    <div class="card">
+      <h2>Diagnostics — Event Timeline</h2>
+      <div class="event-log" id="event-log"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const statusColors = {
+  BOOTING:  {color:'#7d8697', label:'BOOTING'},
+  HEALTHY:  {color:'#22c55e', label:'HEALTHY'},
+  DEGRADED: {color:'#eab308', label:'DEGRADED'},
+  WARNING:  {color:'#eab308', label:'WARNING'},
+  CRITICAL: {color:'#ef4444', label:'CRITICAL'},
+  E_STOP:   {color:'#6b7280', label:'E-STOP'},
+  SHUTDOWN: {color:'#374151', label:'SHUTDOWN'},
+};
+
+let seenFaults = new Set();
+let lastEstopActive = false;
+let lastState = {};
+
+function fmt(n, d=2) { return (typeof n === 'number') ? n.toFixed(d) : '--'; }
+
+function logEvent(text, level) {
+  const log = document.getElementById('event-log');
+  const row = document.createElement('div');
+  row.className = 'event-row ' + (level || '');
+  const t = new Date().toLocaleTimeString();
+  row.innerHTML = `<span class="t">${t}</span> — ${text}`;
+  log.prepend(row);
+  while (log.children.length > 60) log.removeChild(log.lastChild);
+}
+
+function render(state) {
+  lastState = state;
+  document.getElementById('robot-id-sub').textContent =
+    `Robot ID: ${state.robot_id || '--'}  |  Autonomous Mobile Robot Fleet Monitor`;
+  document.getElementById('uptime').textContent = fmt(state.system_uptime_sec, 0) + 's';
+
+  const connDot = document.getElementById('conn-dot');
+  connDot.className = 'dot on';
+  document.getElementById('conn-text').textContent = 'ROS 2 Connected';
+
+  const h = state.health;
+  if (!h) return;
+
+  document.getElementById('op-mode').textContent = h.safety_controller_state || '--';
+
+  // ---- Status indicator ----
+  const meta = statusColors[h.health_state] || {color:'#7d8697', label: h.health_state};
+  const circle = document.getElementById('status-circle');
+  circle.style.borderColor = meta.color;
+  circle.style.color = meta.color;
+  circle.style.boxShadow = `0 0 22px ${meta.color}55`;
+  document.getElementById('status-label').textContent = meta.label;
+  document.getElementById('status-label').style.color = meta.color;
+  document.getElementById('status-sub').textContent =
+    (h.active_faults && h.active_faults.length) ? h.active_faults[0] : 'All systems nominal';
+
+  // ---- E-stop ----
+  const estopBtn = document.getElementById('estop-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  document.getElementById('estop-state').textContent = h.e_stop_active ? 'ACTIVE' : 'CLEAR';
+  document.getElementById('safety-state').textContent = h.safety_controller_state || '--';
+  document.getElementById('lidar-fresh').textContent =
+    (h.safety_controller_state === 'LIDAR_STALE') ? 'STALE' : 'FRESH';
+  if (h.e_stop_active) {
+    estopBtn.textContent = 'E-STOP ACTIVE';
+    estopBtn.classList.add('active');
+    resetBtn.classList.add('visible');
+  } else {
+    estopBtn.textContent = 'EMERGENCY STOP';
+    estopBtn.classList.remove('active');
+    resetBtn.classList.remove('visible');
+  }
+  if (h.e_stop_active && !lastEstopActive) logEvent('E-stop ACTIVATED', 'crit');
+  if (!h.e_stop_active && lastEstopActive) logEvent('E-stop CLEARED', 'warn');
+  lastEstopActive = h.e_stop_active;
+
+  // ---- Battery ----
+  const b = h.battery || {};
+  document.getElementById('batt-pct').textContent = fmt(b.percentage, 1) + '%';
+  document.getElementById('batt-volt').textContent = fmt(b.voltage, 2) + ' V';
+  document.getElementById('batt-current').textContent = fmt(b.current, 2) + ' A';
+  document.getElementById('batt-state').textContent = b.state || '--';
+  document.getElementById('batt-remaining').textContent =
+    (typeof b.estimated_remaining_minutes === 'number') ? fmt(b.estimated_remaining_minutes, 0) + ' min' : '--';
+  document.getElementById('batt-source').textContent = b.is_simulated ? 'SIMULATED' : 'HARDWARE';
+  const bar = document.getElementById('batt-bar');
+  const pct = Math.max(0, Math.min(100, b.percentage || 0));
+  bar.style.width = pct + '%';
+  bar.style.background = b.state === 'CRITICAL' ? statusColors.CRITICAL.color
+    : (b.state === 'LOW' ? statusColors.WARNING.color : statusColors.HEALTHY.color);
+
+  // ---- Localization ----
+  const loc = h.localization || {};
+  const pose = loc.pose || {};
+  document.getElementById('loc-x').textContent = fmt(pose.x, 2) + ' m';
+  document.getElementById('loc-y').textContent = fmt(pose.y, 2) + ' m';
+  document.getElementById('loc-yaw').textContent = fmt((pose.yaw || 0) * 180 / Math.PI, 1) + '°';
+  document.getElementById('loc-source').textContent = loc.source || '--';
+  document.getElementById('loc-state').textContent = loc.is_stale ? 'STALE' : (loc.is_healthy ? 'HEALTHY' : 'DEGRADED');
+  document.getElementById('loc-msg').textContent = loc.message || '--';
+
+  // ---- Velocity ----
+  const cmd = state.cmd_vel || {};
+  document.getElementById('vel-lin-cmd').textContent = fmt(cmd.linear_x, 2);
+  document.getElementById('vel-ang-cmd').textContent = fmt(cmd.angular_z, 2);
+  document.getElementById('vel-lin-act').textContent = fmt(loc.linear_speed, 2);
+  document.getElementById('vel-ang-act').textContent = fmt(loc.angular_speed, 2);
+
+  // ---- Sensors ----
+  const grid = document.getElementById('sensor-grid');
+  grid.innerHTML = '';
+  const faultControls = document.getElementById('fault-controls');
+  faultControls.innerHTML = '';
+  (h.sensors || []).forEach(s => {
+    const badgeClass = s.state === 'ONLINE' ? 'online' : (s.state === 'STALE' ? 'stale' : 'failed');
+    const div = document.createElement('div');
+    div.className = 'sensor-card';
+    div.innerHTML = `
+      <div class="name">${s.name} <span style="color:var(--text-dim); font-weight:400;">(${s.criticality})</span></div>
+      <span class="badge ${badgeClass}">${s.state}</span>
+      <div class="meta">${fmt(s.frequency_hz,1)} Hz · age ${fmt(s.seconds_since_last_msg,2)}s · fails ${s.failure_count}</div>`;
+    grid.appendChild(div);
+
+    const btn = document.createElement('button');
+    btn.textContent = (s.state === 'ONLINE') ? `Fail ${s.name}` : `Restore ${s.name}`;
+    btn.onclick = () => setFault(s.name, s.state === 'ONLINE');
+    faultControls.appendChild(btn);
+  });
+
+  // ---- Diagnostics timeline: log any newly-appeared fault string ----
+  const currentFaults = new Set(h.active_faults || []);
+  currentFaults.forEach(f => {
+    if (!seenFaults.has(f)) logEvent(f, f.toLowerCase().includes('critical') || f.toLowerCase().includes('e-stop') ? 'crit' : 'warn');
+  });
+  seenFaults = currentFaults;
+
+  drawMap(state);
+}
+
+function drawMap(state) {
+  const canvas = document.getElementById('map');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const h = state.health || {};
+  const loc = h.localization || {};
+  const pose = loc.pose || {x: 0, y: 0, yaw: 0};
+
+  // Approximate Gazebo warehouse envelope:
+  // x: [-15, 15] m, y: [-10, 10] m
+  const WORLD_W = 30.0;
+  const WORLD_H = 20.0;
+
+  const scale = Math.min(
+    (W - 40) / WORLD_W,
+    (H - 40) / WORLD_H
+  );
+
+  const cx = W / 2;
+  const cy = H / 2;
+
+  // Convert warehouse world coordinates to canvas coordinates.
+  function worldToCanvas(x, y) {
+    return {
+      x: cx + x * scale,
+      y: cy - y * scale
+    };
+  }
+
+  // ---------------------------------------------------------------
+  // Warehouse perimeter
+  // ---------------------------------------------------------------
+  const topLeft = worldToCanvas(-15, 10);
+  const bottomRight = worldToCanvas(15, -10);
+
+  ctx.strokeStyle = '#26314a';
+  ctx.lineWidth = 2;
+
+  ctx.strokeRect(
+    topLeft.x,
+    topLeft.y,
+    bottomRight.x - topLeft.x,
+    bottomRight.y - topLeft.y
+  );
+
+  // ---------------------------------------------------------------
+  // Warehouse grid
+  // ---------------------------------------------------------------
+  ctx.strokeStyle = 'rgba(80, 100, 130, 0.12)';
+  ctx.lineWidth = 1;
+
+  for (let x = -15; x <= 15; x += 5) {
+    const p1 = worldToCanvas(x, -10);
+    const p2 = worldToCanvas(x, 10);
+
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+  }
+
+  for (let y = -10; y <= 10; y += 5) {
+    const p1 = worldToCanvas(-15, y);
+    const p2 = worldToCanvas(15, y);
+
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+  }
+
+  // ---------------------------------------------------------------
+  // Warehouse shelf racks
+  // Dashboard visualization only.
+  // ---------------------------------------------------------------
+  const shelves = [
+    [-10, 5, 4, 1.2],
+    [-3, 5, 4, 1.2],
+    [4, 5, 4, 1.2],
+    [10, 5, 4, 1.2],
+
+    [-10, -6, 4, 1.2],
+    [-3, -6, 4, 1.2],
+    [4, -6, 4, 1.2],
+    [10, -6, 4, 1.2]
+  ];
+
+  ctx.fillStyle = '#182131';
+  ctx.strokeStyle = '#2c3850';
+  ctx.lineWidth = 1.5;
+
+  shelves.forEach(([x, y, w, d]) => {
+    const p = worldToCanvas(x, y + d);
+
+    ctx.fillRect(
+      p.x,
+      p.y,
+      w * scale,
+      d * scale
+    );
+
+    ctx.strokeRect(
+      p.x,
+      p.y,
+      w * scale,
+      d * scale
+    );
+  });
+
+  // ---------------------------------------------------------------
+  // Charging-zone visual marker.
+  // This is visualization only; no automatic docking/charging.
+  // ---------------------------------------------------------------
+  const charging = worldToCanvas(12, -8);
+
+  ctx.strokeStyle = 'rgba(34, 197, 94, 0.45)';
+  ctx.lineWidth = 2;
+
+  ctx.strokeRect(
+    charging.x - 1.5 * scale,
+    charging.y - 1.0 * scale,
+    3.0 * scale,
+    2.0 * scale
+  );
+
+  ctx.fillStyle = 'rgba(34, 197, 94, 0.08)';
+
+  ctx.fillRect(
+    charging.x - 1.5 * scale,
+    charging.y - 1.0 * scale,
+    3.0 * scale,
+    2.0 * scale
+  );
+
+  // ---------------------------------------------------------------
+  // Robot
+  // ---------------------------------------------------------------
+  const robot = worldToCanvas(
+    pose.x || 0,
+    pose.y || 0
+  );
+
+  const robotX = robot.x;
+  const robotY = robot.y;
+  const yaw = pose.yaw || 0;
+
+  // Safety slow-zone visual aid.
+  ctx.beginPath();
+  ctx.arc(
+    robotX,
+    robotY,
+    1.0 * scale,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.strokeStyle = 'rgba(234,179,8,0.35)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // ---------------------------------------------------------------
+  // LiDAR obstacle points
+  // ---------------------------------------------------------------
+  ctx.fillStyle = '#ef4444';
+
+  (state.scan_points || []).forEach(([angle, range]) => {
+    const wx =
+      (pose.x || 0) +
+      range * Math.cos(yaw + angle);
+
+    const wy =
+      (pose.y || 0) +
+      range * Math.sin(yaw + angle);
+
+    const point = worldToCanvas(wx, wy);
+
+    ctx.fillRect(
+      point.x - 1.5,
+      point.y - 1.5,
+      3,
+      3
+    );
+  });
+
+  // ---------------------------------------------------------------
+  // Robot direction triangle
+  // ---------------------------------------------------------------
+  ctx.save();
+
+  ctx.translate(robotX, robotY);
+  ctx.rotate(-yaw);
+
+  ctx.fillStyle =
+    h.e_stop_active
+      ? '#6b7280'
+      : (statusColors[h.health_state] || {}).color || '#3b82f6';
+
+  ctx.beginPath();
+  ctx.moveTo(14, 0);
+  ctx.lineTo(-10, 8);
+  ctx.lineTo(-10, -8);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function triggerEstop() {
+  const active = lastState.health && lastState.health.e_stop_active;
+  if (active) return; // use the explicit reset button instead
+  fetch('/api/estop', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({activate: true, confirm_reset: false, reason: 'dashboard operator button'})
+  });
+}
+function resetEstop() {
+  if (!confirm('Confirm E-stop reset? The robot will resume operating once cleared.')) return;
+  fetch('/api/estop', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({activate: false, confirm_reset: true, reason: 'dashboard operator reset'})
+  });
+}
+function setFault(sensorName, enable) {
+  fetch('/api/fault', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({sensor_name: sensorName, fault_enabled: enable})
+  });
+}
+function setBatteryOverride(percentage, enable) {
+  fetch('/api/battery_override', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({percentage: percentage, override_enabled: enable})
+  });
+}
+
+function connect() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const ws = new WebSocket(`${proto}://${location.host}/ws`);
+  ws.onmessage = (evt) => render(JSON.parse(evt.data));
+  ws.onclose = () => {
+    document.getElementById('conn-dot').className = 'dot off';
+    document.getElementById('conn-text').textContent = 'Disconnected — retrying…';
+    setTimeout(connect, 1500);
+  };
+  ws.onerror = () => ws.close();
+}
+connect();
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>warehouse_robot_dashboard</name>
+  <version>1.0.0</version>
+  <description>
+    Real-time robot operations dashboard: a rclpy bridge node that
+    exposes ROS 2 topics/services over WebSocket + REST (FastAPI) to a
+    static HTML/CSS/JS single-page console. Monitoring/control UI only
+    -- see README "Safety independence" section: this package cannot
+    affect robot safety even if it crashes.
+  </description>
+  <maintainer email="tanishk@example.com">Tanishk</maintainer>
+  <license>Apache-2.0</license>
+
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>warehouse_robot_msgs</depend>
+
+  <!-- fastapi / uvicorn are intentionally NOT rosdep keys on most
+       distros: install them with pip (see requirements.txt). This is
+       called out explicitly in the top-level README rather than
+       silently assumed. -->
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

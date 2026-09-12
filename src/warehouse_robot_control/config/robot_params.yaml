@@ -1,0 +1,46 @@
+battery_manager:
+  ros__parameters:
+    simulate_battery: true
+    update_rate_hz: 2.0
+    nominal_voltage: 24.0
+    min_voltage: 20.0
+    design_capacity_ah: 20.0
+    idle_drain_percent_per_sec: 0.0015
+    moving_drain_multiplier: 6.0
+    low_battery_threshold: 30.0
+    critical_battery_threshold: 15.0
+    idle_current_amps: 1.2
+    moving_current_amps: 5.5
+
+localization_monitor:
+  ros__parameters:
+    odom_topic: "/odom"
+    stale_timeout_sec: 1.0
+    covariance_warn_threshold: 0.5
+    publish_rate_hz: 5.0
+    max_pose_jump_m: 0.5
+    localization_source: "wheel_odometry"
+
+safety_controller:
+  ros__parameters:
+    control_rate_hz: 10.0
+    cruise_linear_speed: 0.3
+    avoid_angular_speed: 0.6
+    obstacle_stop_distance: 0.45
+    obstacle_slow_distance: 1.0
+    low_battery_speed_scale: 0.4
+    front_sector_deg: 60.0
+    # Critical-fix parameters (docs/AUDIT.md #1) -- never hardcoded.
+    lidar_timeout_sec: 0.5
+    lidar_recovery_consecutive_msgs: 5
+    odom_timeout_sec: 0.5
+    battery_timeout_sec: 1.5
+
+e_stop_manager:
+  ros__parameters:
+    status_publish_rate_hz: 5.0
+    reset_grace_period_sec: 1.0
+
+health_aggregator:
+  ros__parameters:
+    publish_rate_hz: 2.0

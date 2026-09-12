@@ -1,0 +1,23 @@
+# Controls the E-stop state machine owned by e_stop_manager.
+#
+# activate=true always wins immediately and unconditionally, from any
+# current state (safety first). Clearing an ACTIVE stop is a distinct,
+# explicit action: you must call again with activate=false AND
+# confirm_reset=true. That request first moves the state to
+# RESET_REQUESTED; the node only finalizes the transition to CLEAR if
+# no new activation arrives within a short grace window
+# (see 'reset_grace_period_sec' parameter), so a race with a fresh
+# trigger can never be silently overridden by a stale reset call.
+# There is no automatic/unattended recovery path.
+
+bool activate
+bool confirm_reset
+string reason
+---
+bool success
+string message
+
+uint8 CLEAR=0
+uint8 ACTIVE=1
+uint8 RESET_REQUESTED=2
+uint8 state

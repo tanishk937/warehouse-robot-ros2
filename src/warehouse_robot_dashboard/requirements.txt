@@ -1,0 +1,4 @@
+# Not resolvable via rosdep on most distros -- install with:
+#   pip install -r requirements.txt --break-system-packages
+fastapi>=0.100
+uvicorn[standard]>=0.23
