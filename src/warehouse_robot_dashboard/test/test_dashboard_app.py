@@ -1,28 +1,12 @@
 #!/usr/bin/env python3
 # Copyright 2026 Tanishk Patidar
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This source code is provided for viewing, evaluation, educational,
+# and portfolio purposes. All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-"""
-Test the FastAPI dashboard application.
+# See the repository LICENSE file for terms governing copying,
+# modification, distribution, and commercial use.
 
-Real, executable HTTP/WebSocket tests for the dashboard's FastAPI app
-(dashboard_app.py), using FastAPI's TestClient. No ROS 2 install or
-rclpy needed -- dashboard_app.py takes plain get_snapshot/enqueue
-callables, which we fake here, exactly as dashboard_bridge.py's real
-node methods would be used in production. This genuinely proves the
-web layer (HTML serving, REST endpoints, WebSocket broadcast loop)
-works, rather than only checking that the file parses as Python.
-"""
 
 import os
 import sys

@@ -1,44 +1,11 @@
 #!/usr/bin/env python3
 # Copyright 2026 Tanishk Patidar
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This source code is provided for viewing, evaluation, educational,
+# and portfolio purposes. All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""
-Configuration-driven sensor heartbeat and staleness monitor.
-
-Generic, configuration-driven sensor heartbeat / staleness monitor.
-
-The node reads a list of sensor definitions from ROS 2 parameters
-(name, topic, message type, criticality, expected frequency, stale
-timeout) and dynamically subscribes to each one using
-rosidl_runtime_py.utilities.get_message() to resolve the message class
-from its string type name at runtime.
-
-Adding a brand new sensor to the fleet therefore never requires
-touching this file: it only requires appending an entry to
-config/sensors.yaml. This directly satisfies the "modular, scalable
-sensor configuration" architectural requirement.
-
-Each sensor is reported with an explicit ONLINE/STALE/FAILED state
-(warehouse_robot_msgs/SensorStatus) rather than only booleans, plus a
-failure_count that increments every time the sensor transitions from
-healthy into STALE/FAILED -- useful for spotting a flaky sensor that
-recovers between checks but keeps dropping out.
-
-Publishes:
-    /diagnostics/sensor_heartbeats  (warehouse_robot_msgs/SensorHeartbeatArray)
-    /diagnostics                    (diagnostic_msgs/DiagnosticArray)
-"""
+# See the repository LICENSE file for terms governing copying,
+# modification, distribution, and commercial use.
 
 from collections import deque
 import time

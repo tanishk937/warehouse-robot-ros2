@@ -1,41 +1,11 @@
 #!/usr/bin/env python3
 # Copyright 2026 Tanishk Patidar
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This source code is provided for viewing, evaluation, educational,
+# and portfolio purposes. All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""
-Pure robot health state-machine logic.
-
-Pure, rclpy-free implementation of the formal robot health state
-machine (Section 18 of the upgrade brief), unit-tested directly in
-test/test_health_state_logic.py.
-
-States (mirrors warehouse_robot_msgs/msg/RobotHealth constants):
-    BOOTING   -- not enough data has arrived yet to judge health
-    HEALTHY   -- no faults of any kind
-    DEGRADED  -- a non-critical sensor is stale/failed; robot fully operational
-    WARNING   -- battery LOW, or localization is degraded but not lost
-    CRITICAL  -- a critical sensor is stale/failed, battery CRITICAL, or
-                 localization is completely lost (stale)
-    E_STOP    -- E-stop is active (always wins, even while booting)
-    SHUTDOWN  -- not computed here; set only by external orchestration
-                 on deliberate node shutdown.
-
-Precedence when multiple conditions are true simultaneously (worst wins):
-    E_STOP > CRITICAL > WARNING > DEGRADED > HEALTHY
-BOOTING is only reachable when nothing else applies and insufficient
-data has arrived.
-"""
+# See the repository LICENSE file for terms governing copying,
+# modification, distribution, and commercial use.
 
 BOOTING = 0
 HEALTHY = 1

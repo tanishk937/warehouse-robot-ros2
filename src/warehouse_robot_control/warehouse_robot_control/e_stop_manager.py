@@ -1,49 +1,12 @@
 #!/usr/bin/env python3
 # Copyright 2026 Tanishk Patidar
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This source code is provided for viewing, evaluation, educational,
+# and portfolio purposes. All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# See the repository LICENSE file for terms governing copying,
+# modification, distribution, and commercial use.
 
-"""
-Emergency-stop state manager for the warehouse robot.
-
-Central authority for the robot's emergency-stop state, implementing
-the CLEAR / ACTIVE / RESET_REQUESTED state machine defined in
-estop_logic.py (see docs/AUDIT.md #2 for why the previous
-unconditional activate=false clear was unsafe).
-
-Any client -- a remote dashboard, a physical button bridge, or another
-node -- can activate or clear the stop through either:
-    * the /e_stop/set service (warehouse_robot_msgs/srv/SetEStop), or
-    * a std_msgs/Bool published on /e_stop/remote_trigger (activation only;
-      clearing an E-stop is deliberately NOT possible from this topic --
-      see _on_remote_trigger).
-
-The resulting boolean state is republished as a latched
-(TRANSIENT_LOCAL) std_msgs/Bool on /e_stop/status, so any node started
-*after* the stop was triggered still immediately receives the current
-state on subscription -- this is exactly the topic safety_controller
-listens to in order to zero /cmd_vel the instant a stop is requested.
-The richer 3-state machine value is published on /e_stop/state_machine
-(std_msgs/UInt8) for dashboard/debug visibility.
-
-Publishes:
-    /e_stop/status          (std_msgs/Bool,   RELIABLE + TRANSIENT_LOCAL)
-    /e_stop/state_machine   (std_msgs/UInt8,  RELIABLE + TRANSIENT_LOCAL)
-Subscribes:
-    /e_stop/remote_trigger  (std_msgs/Bool) -- activation-only, see above
-Services:
-    /e_stop/set             (warehouse_robot_msgs/srv/SetEStop)
-"""
 
 import threading
 

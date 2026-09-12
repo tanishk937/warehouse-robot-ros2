@@ -1,48 +1,11 @@
 #!/usr/bin/env python3
 # Copyright 2026 Tanishk Patidar
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This source code is provided for viewing, evaluation, educational,
+# and portfolio purposes. All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""
-Configuration-driven sensor fault-injection topic gate.
-
-Config-driven topic-gate fault injector (see docs/AUDIT.md #9 /
-Section 17 of the upgrade brief: "do not require manually killing
-random processes for every demonstration").
-
-For each configured sensor, this node subscribes to its raw Gazebo
-topic (e.g. /scan_raw) and republishes onto the public topic that the
-rest of the system actually watches (e.g. /scan). While a fault is
-injected for that sensor, republishing simply stops -- every consumer
-(sensor_heartbeat_monitor, safety_controller, localization_monitor)
-experiences this exactly like a real sensor failure: the topic goes
-silent and their existing, independent staleness-detection logic
-handles it. No duplicate "is this a fault or a real failure" branching
-exists anywhere downstream, which is deliberate -- a fault-injector
-that consumers can tell apart from a real failure would not actually
-be testing the real failure path.
-
-Adding a new gateable sensor requires only a new entry in
-config/fault_injector.yaml, following the same
-config-driven-scalability pattern as sensor_heartbeat_monitor.
-
-Publishes:
-    <public_topic> for each configured sensor (message type per config)
-Subscribes:
-    <raw_topic> for each configured sensor (message type per config)
-Services:
-    /fault/set_sensor_fault   (warehouse_robot_msgs/srv/SetSensorFault)
-"""
+# See the repository LICENSE file for terms governing copying,
+# modification, distribution, and commercial use.
 
 import rclpy
 from rclpy.node import Node

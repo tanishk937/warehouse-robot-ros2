@@ -1,51 +1,12 @@
 #!/usr/bin/env python3
 # Copyright 2026 Tanishk Patidar
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This source code is provided for viewing, evaluation, educational,
+# and portfolio purposes. All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# See the repository LICENSE file for terms governing copying,
+# modification, distribution, and commercial use.
 
-"""
-Battery manager node for simulated or real battery telemetry.
-
-Simulates and/or monitors the robot's battery.
-
-Gazebo Classic ships no stock battery-state plugin, so by default
-(`simulate_battery:=true`) this node generates a physically plausible
-sensor_msgs/BatteryState stream itself -- draining faster while the
-robot is actually moving (sampled from /cmd_vel) -- and republishes it
-as a classified warehouse_robot_msgs/BatteryStatus, which explicitly
-sets is_simulated=true so nothing downstream can mistake it for real
-telemetry. Flip `simulate_battery` to false and the node instead
-subscribes to a real /battery_state publisher (real hardware, or a
-future Gazebo battery plugin) and performs the exact same
-classification/trigger logic on top of it -- the architecture is the
-same either way, only the data source changes.
-
-/battery/set_override (SetBatteryOverride) is a fault-injection hook:
-while an override is active, simulated drain is frozen and the node
-reports exactly the overridden percentage, so demo scenarios (LOW,
-CRITICAL) are reproducible with one service call instead of waiting
-for real drain or editing YAML and restarting.
-
-Publishes:
-    /battery_state                 (sensor_msgs/BatteryState)   [only if simulating]
-    /battery/status                (warehouse_robot_msgs/BatteryStatus)
-    /battery/low_battery_trigger   (std_msgs/Bool)
-Subscribes:
-    /cmd_vel                       (geometry_msgs/Twist)
-    /battery_state                 (sensor_msgs/BatteryState)   [only if not simulating]
-Services:
-    /battery/set_override          (warehouse_robot_msgs/srv/SetBatteryOverride)
-"""
 
 from geometry_msgs.msg import Twist
 import rclpy

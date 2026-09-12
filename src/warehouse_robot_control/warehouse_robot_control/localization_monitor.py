@@ -1,42 +1,11 @@
 #!/usr/bin/env python3
 # Copyright 2026 Tanishk Patidar
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This source code is provided for viewing, evaluation, educational,
+# and portfolio purposes. All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""
-Wheel-odometry localization health monitor.
-
-SCOPE (see docs/AUDIT.md #4 -- stated honestly, not oversold): this
-node monitors raw wheel odometry (nav_msgs/Odometry from Gazebo's
-diff-drive plugin, published as /odom after fault_injector's
-passthrough). It is NOT a fused localization system -- there is no
-AMCL and no EKF/UKF in this project. The 'source' field on every
-published LocalizationStatus always says exactly what is being
-watched, and this message type is intentionally source-agnostic: a
-future EKF-fused or AMCL-based estimator could publish the same
-message on the same topic and nothing downstream (health_aggregator,
-dashboard) would need to change.
-
-Beyond staleness and covariance, this node also flags implausible pose
-jumps between consecutive messages (an excessive teleport in one
-timestep is treated as a localization fault, since real wheel odometry
-never teleports).
-
-Publishes:
-    /localization/status   (warehouse_robot_msgs/LocalizationStatus)
-Subscribes:
-    /odom                  (nav_msgs/Odometry)
-"""
+# See the repository LICENSE file for terms governing copying,
+# modification, distribution, and commercial use.
 
 import math
 

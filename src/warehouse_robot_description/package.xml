@@ -5,7 +5,7 @@
   <version>1.0.0</version>
   <description>URDF model and Gazebo plugin configuration for the warehouse_robot differential-drive platform.</description>
   <maintainer email="tanishk@example.com">Tanishk</maintainer>
-  <license>Apache-2.0</license>
+  <license>Proprietary</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

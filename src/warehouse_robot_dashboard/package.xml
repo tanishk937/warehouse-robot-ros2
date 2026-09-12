@@ -11,7 +11,7 @@
     affect robot safety even if it crashes.
   </description>
   <maintainer email="tanishk@example.com">Tanishk</maintainer>
-  <license>Apache-2.0</license>
+  <license>Proprietary</license>
 
   <depend>rclpy</depend>
   <depend>std_msgs</depend>

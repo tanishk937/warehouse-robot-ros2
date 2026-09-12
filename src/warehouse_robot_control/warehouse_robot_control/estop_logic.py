@@ -1,38 +1,11 @@
 #!/usr/bin/env python3
 # Copyright 2026 Tanishk Patidar
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This source code is provided for viewing, evaluation, educational,
+# and portfolio purposes. All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""
-Pure emergency-stop state-machine transition logic.
-
-Pure, rclpy-free E-stop state machine transition rules, used by
-e_stop_manager.py and unit-tested directly in test/test_estop_logic.py.
-
-States:
-    CLEAR            -- robot may move, subject to every other safety layer
-    ACTIVE           -- E-stop engaged, /cmd_vel forced to zero
-    RESET_REQUESTED  -- an explicit reset was requested and is pending
-                        finalization after a grace period, during which
-                        a fresh activation immediately wins and cancels it
-
-Design intent (see docs/AUDIT.md #2): activation must always be
-allowed instantly, from any state, with no confirmation step, because
-that is the safety-critical direction. Clearing must never happen as
-a side effect of a generic "set state" call -- it requires
-confirm_reset=True, and even then is not final until the grace-period
-timer in e_stop_manager.py confirms no new activation arrived.
-"""
+# See the repository LICENSE file for terms governing copying,
+# modification, distribution, and commercial use.
 
 from dataclasses import dataclass
 

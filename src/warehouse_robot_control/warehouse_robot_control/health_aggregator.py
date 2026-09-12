@@ -1,51 +1,12 @@
 #!/usr/bin/env python3
 # Copyright 2026 Tanishk Patidar
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This source code is provided for viewing, evaluation, educational,
+# and portfolio purposes. All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# See the repository LICENSE file for terms governing copying,
+# modification, distribution, and commercial use.
 
-"""
-Robot health aggregation and diagnostics node.
-
-Fuses battery, localization, sensor-heartbeat, e-stop and
-safety-controller status into one authoritative
-warehouse_robot_msgs/RobotHealth message (using the formal
-BOOTING/HEALTHY/DEGRADED/WARNING/CRITICAL/E_STOP/SHUTDOWN state
-machine defined in health_state_logic.py) plus a standard
-diagnostic_msgs/DiagnosticArray entry, and exposes the latest snapshot
-both by topic (for a live monitoring dashboard, including a
-pre-serialized JSON payload) and by service (for on-demand polling).
-
-Ownership note (docs/AUDIT.md #13, Section 21 of the upgrade brief):
-this node and sensor_heartbeat_monitor are the ONLY two publishers on
-/diagnostics, by design, following the standard ROS 2 diagnostics
-convention: sensor_heartbeat_monitor contributes one DiagnosticStatus
-per monitored sensor, this node contributes exactly one top-level
-"robot_overall" DiagnosticStatus summarizing everything. Nothing else
-in this system publishes to /diagnostics.
-
-Publishes:
-    /robot_health                  (warehouse_robot_msgs/RobotHealth)
-    /robot_health/dashboard_json   (std_msgs/String)
-    /diagnostics                   (diagnostic_msgs/DiagnosticArray)
-Subscribes:
-    /battery/status                    (warehouse_robot_msgs/BatteryStatus)
-    /localization/status               (warehouse_robot_msgs/LocalizationStatus)
-    /diagnostics/sensor_heartbeats     (warehouse_robot_msgs/SensorHeartbeatArray)
-    /e_stop/status                     (std_msgs/Bool)
-    /safety_controller/state           (std_msgs/String)
-Services:
-    /robot_health/get              (warehouse_robot_msgs/srv/GetSystemHealth)
-"""
 
 import json
 import math

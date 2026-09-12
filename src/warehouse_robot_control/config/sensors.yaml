@@ -1,8 +1,3 @@
-# Modular sensor registry for sensor_heartbeat_monitor.
-#
-# To add a new sensor to the fleet, add its name to "sensor_names" and
-# add a matching "<name>.*" parameter block below. No source code in
-# sensor_heartbeat_monitor.py needs to change.
 
 sensor_heartbeat_monitor:
   ros__parameters:

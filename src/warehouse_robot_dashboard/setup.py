@@ -1,3 +1,11 @@
+# Copyright 2026 Tanishk Patidar
+#
+# This source code is provided for viewing, evaluation, educational,
+# and portfolio purposes. All rights reserved.
+#
+# See the repository LICENSE file for terms governing copying,
+# modification, distribution, and commercial use.
+
 from glob import glob
 import os
 
@@ -21,7 +29,7 @@ setup(
     maintainer='Tanishk',
     maintainer_email='tanishk@example.com',
     description='Real-time ROS 2 <-> web dashboard bridge for the warehouse robot.',
-    license='Apache-2.0',
+    license='Proprietary',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [

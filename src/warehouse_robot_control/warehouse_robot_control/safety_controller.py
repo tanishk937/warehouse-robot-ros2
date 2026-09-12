@@ -1,57 +1,12 @@
 #!/usr/bin/env python3
 # Copyright 2026 Tanishk Patidar
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This source code is provided for viewing, evaluation, educational,
+# and portfolio purposes. All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# See the repository LICENSE file for terms governing copying,
+# modification, distribution, and commercial use.
 
-"""
-Safety controller and sole /cmd_vel authority.
-
-The sole owner/publisher of /cmd_vel. This node is the final authority
-over robot motion; every other safety signal in the system (E-stop,
-battery, sensor health) flows into it and it alone decides what, if
-anything, gets commanded.
-
-CRITICAL FIX (see docs/AUDIT.md #1): the previous version stored the
-latest /scan message and only checked "have I ever received one?" --
-if the LiDAR stopped publishing after having published once, the old
-scan stayed in memory and kept being fed to the obstacle-avoidance math
-indefinitely. That is fixed here with an INDEPENDENT staleness check
-that runs every control cycle, before any obstacle logic is consulted:
-LiDAR message *age* (wall-clock time since the last /scan was
-received), not message *presence*, gates whether obstacle avoidance is
-allowed to run at all.
-
-Priority order enforced every control cycle (highest first):
-    1. E-stop active                     -> zero velocity, state E_STOPPED
-    2. LiDAR stale / never received      -> zero velocity, state LIDAR_STALE
-    3. Odometry stale / never received   -> zero velocity, state ODOM_STALE
-    4. Battery CRITICAL                  -> zero velocity, state BATTERY_CRITICAL_STOP
-    5. Obstacle avoidance (incl. slow zone) -> state OBSTACLE_STOP / SLOW
-    6. Battery LOW speed derate           -> folded into the cruise speed used in (5)/(7)
-    7. Normal cruise                      -> state CRUISING
-
-Recovery from LIDAR_STALE is not instantaneous: 'lidar_recovery_consecutive_msgs'
-fresh scans must arrive before the robot is allowed to move again, to
-avoid chattering on a flaky sensor connection.
-
-Publishes:
-    /cmd_vel                    (geometry_msgs/Twist)
-    /safety_controller/state    (std_msgs/String) -- for the dashboard
-Subscribes:
-    /scan            (sensor_msgs/LaserScan)
-    /e_stop/status   (std_msgs/Bool)
-    /battery/status  (warehouse_robot_msgs/BatteryStatus)
-"""
 import math
 import time
 

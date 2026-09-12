@@ -5,7 +5,7 @@
   <version>1.0.0</version>
   <description>Core autonomy, safety and diagnostics nodes for the warehouse_robot system.</description>
   <maintainer email="tanishk@example.com">Tanishk</maintainer>
-  <license>Apache-2.0</license>
+  <license>Proprietary</license>
 
   <depend>rclpy</depend>
   <depend>std_msgs</depend>

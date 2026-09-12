@@ -1,34 +1,12 @@
 #!/usr/bin/env python3
 # Copyright 2026 Tanishk Patidar
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This source code is provided for viewing, evaluation, educational,
+# and portfolio purposes. All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-"""
-Provide the FastAPI web application for the warehouse robot dashboard.
+# See the repository LICENSE file for terms governing copying,
+# modification, distribution, and commercial use.
 
-The FastAPI application itself is deliberately kept free of any rclpy
-import so it can be exercised with FastAPI's TestClient in plain
-pytest (see test/test_dashboard_app.py) without a ROS 2 install.
-dashboard_bridge.py is the thin ROS glue that supplies the two
-callables this module needs:
-
-    get_snapshot() -> dict      : the latest cached state to broadcast
-    enqueue(kind, payload)      : hand a requested command off to the
-                                   node's own rclpy thread for execution
-
-This mirrors the separation already used for safety_logic.py,
-estop_logic.py and health_state_logic.py in warehouse_robot_control:
-pure/testable logic in one module, ROS wiring in another.
-"""
 
 import asyncio
 import os
@@ -41,6 +19,7 @@ STATIC_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     'static',
 )
+
 
 def build_app(static_dir: str, get_snapshot, enqueue,
               broadcast_rate_hz: float = 5.0) -> FastAPI:
